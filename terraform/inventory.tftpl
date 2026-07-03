@@ -1,0 +1,10 @@
+# Сгенерировано из outputs OpenTofu (terraform/inventory.tftpl). Не редактировать вручную.
+clickhouse:
+  hosts:
+%{ for name, n in nodes ~}
+    ${name}:
+      ansible_host: ${n.external_ip}
+      internal_ip: ${n.internal_ip}
+%{ endfor ~}
+  vars:
+    ansible_user: ${ansible_user}

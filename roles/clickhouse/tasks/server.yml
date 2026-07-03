@@ -1,0 +1,76 @@
+---
+# Настройка компонента ClickHouse Server.
+# Конфиги раскладываются в config.d/ и users.d/ — переопределяют дефолтный config.xml.
+# Сервис запускается только после появления всех конфигов.
+
+# Обе директории доп-конфигов с одинаковыми правами (0755) — один цикл.
+- name: "Убедиться, что каталоги config.d и users.d существуют"
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: clickhouse
+    group: clickhouse
+    mode: "0755"
+  loop:
+    - "{{ clickhouse_server_config_d }}"
+    - "{{ clickhouse_server_users_d }}"
+
+# Четыре конфига config.d отличаются только именем файла (src/dest по шаблону)
+# и одинаковы по правам и notify — один цикл вместо четырёх задач-копий.
+# Имя шаблона = имя итога без .xml.j2; комментарии справа поясняют назначение.
+- name: "Шаблонировать конфиги config.d сервера"
+  ansible.builtin.template:
+    src: "config.d/{{ item }}.xml.j2"
+    dest: "{{ clickhouse_server_config_d }}/{{ item }}.xml"
+    owner: clickhouse
+    group: clickhouse
+    mode: "0640"
+  loop:
+    - listen          # слушать все интерфейсы
+    - zookeeper       # подключение к Keeper-ансамблю
+    - macros          # метки реплики {shard}/{replica} для ReplicatedMergeTree
+    - remote_servers  # топология кластера ch_cluster
+  notify: "Restart clickhouse-server"
+
+- name: "Шаблонировать users.d/default-password.xml (SHA-256 пароля из Vault)"
+  ansible.builtin.template:
+    src: users.d/default-password.xml.j2
+    dest: "{{ clickhouse_server_users_d }}/default-password.xml"
+    owner: clickhouse
+    group: clickhouse
+    mode: "0640"
+  notify: "Restart clickhouse-server"
+  no_log: true
+
+- name: "Включить и запустить сервис clickhouse-server"
+  ansible.builtin.systemd:
+    name: clickhouse-server
+    state: started
+    enabled: true
+    daemon_reload: true
+
+- name: "Health-gate: ожидать TCP-порт ClickHouse {{ clickhouse_tcp_port }}"
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ clickhouse_tcp_port }}"
+    timeout: 60
+    state: started
+
+- name: "Health-gate: ожидать HTTP-порт ClickHouse {{ clickhouse_http_port }}"
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ clickhouse_http_port }}"
+    timeout: 60
+    state: started
+
+- name: "Health-gate: выполнить SELECT 1 через clickhouse-client"
+  ansible.builtin.command:
+    cmd: >-
+      clickhouse-client
+      --host 127.0.0.1
+      --password "{{ clickhouse_default_password }}"
+      --query "SELECT 1"
+  register: clickhouse_server_select1
+  changed_when: false
+  failed_when: clickhouse_server_select1.rc != 0
+  no_log: true

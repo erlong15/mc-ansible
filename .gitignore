@@ -1,0 +1,55 @@
+# Terraform
+terraform.tfvars
+*.tfstate
+*.tfstate.backup
+*.tfstate.*.backup
+.terraform/
+.terraform.lock.hcl
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Secrets
+*.key
+*.pem
+secrets.yaml
+values-secret.yaml
+age-key.txt
+.sops.yaml
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.env
+
+# Go
+vendor/
+*.exe
+*.test
+
+# Node (Marp)
+node_modules/
+*.html
+*.pdf
+slides.html
+slides.pdf
+
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Editor
+.idea/
+.vscode/*.local
+*.swp
+*.swo
+
+# Kubernetes
+kubeconfig
+.kube/
+
+# Ansible
+*.retry
+.vault_pass

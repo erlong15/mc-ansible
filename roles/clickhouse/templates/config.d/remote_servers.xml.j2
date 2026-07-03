@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<!--
+  Топология кластера {{ clickhouse_cluster_name }}: {{ clickhouse_cluster_shards }} шард x {{ clickhouse_cluster_replicas }} реплики.
+  internal_replication=true: запись одной реплике достаточна — остальные синхронизируются
+  через Keeper самостоятельно (не через Distributed-движок).
+  <secret> защищает межсерверные HTTP-запросы от несанкционированного доступа.
+-->
+<clickhouse>
+    <remote_servers>
+        <{{ clickhouse_cluster_name }}>
+            <secret>{{ clickhouse_secret }}</secret>
+            <shard>
+                <internal_replication>true</internal_replication>
+{% for h in groups[clickhouse_cluster_group] %}
+                <replica>
+                    <host>{{ hostvars[h].internal_ip }}</host>
+                    <port>{{ clickhouse_tcp_port }}</port>
+                </replica>
+{% endfor %}
+            </shard>
+        </{{ clickhouse_cluster_name }}>
+    </remote_servers>
+</clickhouse>

@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<!--
+  Макросы реплики: {shard} и {replica} подставляются в движок ReplicatedMergeTree.
+  Пример: ENGINE = ReplicatedMergeTree('/clickhouse/tables/{shard}/events', '{replica}')
+  Благодаря макросам один DDL-запрос создаёт разные Zookeeper-пути на каждой ноде,
+  что позволяет ClickHouse различать реплики одной таблицы.
+-->
+<clickhouse>
+    <macros>
+        <shard>{{ ch_shard }}</shard>
+        <replica>{{ ch_replica }}</replica>
+        <cluster>{{ clickhouse_cluster_name }}</cluster>
+    </macros>
+</clickhouse>

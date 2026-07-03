@@ -1,0 +1,125 @@
+{
+  "type": "excalidraw",
+  "version": 2,
+  "source": "https://excalidraw.com",
+  "elements": [
+    {
+      "type": "rectangle",
+      "id": "yc-cloud",
+      "x": 40, "y": 40,
+      "width": 700, "height": 480,
+      "strokeColor": "#1971c2",
+      "backgroundColor": "#e7f5ff",
+      "fillStyle": "solid",
+      "roughness": 1,
+      "roundness": { "type": 3 },
+      "opacity": 50
+    },
+    {
+      "type": "text",
+      "id": "yc-label",
+      "x": 60, "y": 55,
+      "text": "Yandex Cloud",
+      "fontSize": 18,
+      "fontFamily": 1,
+      "textAlign": "left",
+      "strokeColor": "#1971c2"
+    },
+    {
+      "type": "rectangle",
+      "id": "k8s-cluster",
+      "x": 80, "y": 100,
+      "width": 580, "height": 360,
+      "strokeColor": "#2f9e44",
+      "backgroundColor": "#d3f9d8",
+      "fillStyle": "solid",
+      "roughness": 1,
+      "roundness": { "type": 3 },
+      "opacity": 60
+    },
+    {
+      "type": "text",
+      "id": "k8s-label",
+      "x": 100, "y": 115,
+      "text": "MK8S Cluster",
+      "fontSize": 16,
+      "fontFamily": 1,
+      "textAlign": "left",
+      "strokeColor": "#2f9e44"
+    },
+    {
+      "type": "rectangle",
+      "id": "infra-ns",
+      "x": 110, "y": 150,
+      "width": 200, "height": 120,
+      "strokeColor": "#7048e8",
+      "backgroundColor": "#e5dbff",
+      "fillStyle": "solid",
+      "roughness": 1,
+      "roundness": { "type": 3 }
+    },
+    {
+      "type": "text",
+      "id": "infra-label",
+      "x": 120, "y": 165,
+      "text": "ns: infra\n\nGateway\ncert-manager",
+      "fontSize": 14,
+      "fontFamily": 1,
+      "textAlign": "left",
+      "strokeColor": "#7048e8"
+    },
+    {
+      "type": "rectangle",
+      "id": "demo-ns",
+      "x": 360, "y": 150,
+      "width": 260, "height": 120,
+      "strokeColor": "#f08c00",
+      "backgroundColor": "#fff3bf",
+      "fillStyle": "solid",
+      "roughness": 1,
+      "roundness": { "type": 3 }
+    },
+    {
+      "type": "text",
+      "id": "demo-label",
+      "x": 370, "y": 165,
+      "text": "ns: demo-dev / demo-prod\n\n[TODO: компоненты]",
+      "fontSize": 14,
+      "fontFamily": 1,
+      "textAlign": "left",
+      "strokeColor": "#f08c00"
+    },
+    {
+      "type": "rectangle",
+      "id": "user-box",
+      "x": 40, "y": 560,
+      "width": 120, "height": 60,
+      "strokeColor": "#495057",
+      "backgroundColor": "#f8f9fa",
+      "fillStyle": "solid",
+      "roughness": 1,
+      "roundness": { "type": 3 }
+    },
+    {
+      "type": "text",
+      "id": "user-label",
+      "x": 70, "y": 582,
+      "text": "User",
+      "fontSize": 16,
+      "fontFamily": 1,
+      "textAlign": "center",
+      "strokeColor": "#495057"
+    },
+    {
+      "type": "arrow",
+      "id": "user-arrow",
+      "points": [[0, 0], [0, -80]],
+      "x": 100, "y": 560,
+      "strokeColor": "#2f9e44"
+    }
+  ],
+  "appState": {
+    "gridSize": null,
+    "viewBackgroundColor": "#ffffff"
+  }
+}

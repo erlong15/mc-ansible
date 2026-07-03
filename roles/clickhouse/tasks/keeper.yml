@@ -1,0 +1,74 @@
+---
+# Настройка компонента ClickHouse Keeper.
+# Keeper запускается как отдельный systemd-сервис из бинаря /usr/bin/clickhouse-keeper
+# (симлинк на /usr/bin/clickhouse, поставляемый пакетом clickhouse-server).
+# Отдельный пакет clickhouse-keeper НЕ используется — он конфликтует с clickhouse-server.
+
+- name: "Создать каталог конфигурации Keeper: /etc/clickhouse-keeper"
+  ansible.builtin.file:
+    path: /etc/clickhouse-keeper
+    state: directory
+    owner: clickhouse
+    group: clickhouse
+    mode: "0755"
+
+# Три каталога данных Keeper с одинаковыми правами (0750) — один цикл вместо копипасты.
+- name: "Создать каталоги данных, логов и снимков Keeper"
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: clickhouse
+    group: clickhouse
+    mode: "0750"
+  loop:
+    - "{{ clickhouse_keeper_data_dir }}"
+    - "{{ clickhouse_keeper_log_dir }}"
+    - "{{ clickhouse_keeper_snapshot_dir }}"
+
+- name: "Шаблонировать конфигурацию Keeper: {{ clickhouse_keeper_config_path }}"
+  ansible.builtin.template:
+    src: keeper_config.xml.j2
+    dest: "{{ clickhouse_keeper_config_path }}"
+    owner: clickhouse
+    group: clickhouse
+    mode: "0640"
+  notify: "Restart clickhouse-keeper"
+
+- name: "Шаблонировать systemd unit для clickhouse-keeper"
+  ansible.builtin.template:
+    src: clickhouse-keeper.service.j2
+    dest: /etc/systemd/system/clickhouse-keeper.service
+    owner: root
+    group: root
+    mode: "0644"
+  notify: "Restart clickhouse-keeper"
+
+- name: "Включить и запустить сервис clickhouse-keeper"
+  ansible.builtin.systemd:
+    name: clickhouse-keeper
+    state: started
+    enabled: true
+    daemon_reload: true
+
+- name: "Health-gate: ожидать порт Keeper {{ clickhouse_keeper_tcp_port }}"
+  ansible.builtin.wait_for:
+    host: "{{ hostvars[inventory_hostname].internal_ip }}"
+    port: "{{ clickhouse_keeper_tcp_port }}"
+    timeout: 60
+    state: started
+
+- name: "Health-gate: проверить ответ ruok → imok"
+  ansible.builtin.command:
+    cmd: >-
+      bash -c "echo ruok | nc -q1 {{ hostvars[inventory_hostname].internal_ip }} {{ clickhouse_keeper_tcp_port }}"
+  register: clickhouse_keeper_ruok
+  changed_when: false
+  failed_when: clickhouse_keeper_ruok.stdout | trim != "imok"
+
+- name: "Health-gate: проверить mntr (статистика Keeper)"
+  ansible.builtin.command:
+    cmd: >-
+      bash -c "echo mntr | nc -q1 {{ hostvars[inventory_hostname].internal_ip }} {{ clickhouse_keeper_tcp_port }}"
+  register: clickhouse_keeper_mntr
+  changed_when: false
+  failed_when: "'zk_version' not in clickhouse_keeper_mntr.stdout"

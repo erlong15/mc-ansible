@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<!--
+  Разрешаем ClickHouse Server слушать на всех интерфейсах (0.0.0.0).
+  По умолчанию ClickHouse слушает только localhost — без этого конфига
+  реплики не смогут обращаться друг к другу по internal_ip.
+-->
+<clickhouse>
+    <listen_host>{{ clickhouse_listen_host }}</listen_host>
+</clickhouse>

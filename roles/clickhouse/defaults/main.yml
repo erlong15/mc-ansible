@@ -1,0 +1,51 @@
+---
+# Роль clickhouse: объединяет установку, настройку Keeper и Server в одной роли.
+# Компонент выбирается переменной clickhouse_component: keeper | server.
+
+# --- Компонент и группа кластера ---
+# Задаётся в плее: vars: clickhouse_component: keeper / server
+clickhouse_component: "server"
+# Имя группы инвентори, содержащей все ноды кластера (для шаблонов Jinja2)
+clickhouse_cluster_group: "clickhouse"
+
+# --- Репозиторий и версия ---
+# Официальный deb-репозиторий ClickHouse; переключи на зеркало при работе из РФ:
+#   clickhouse_repo_url: "https://mirror.yandex.ru/mirrors/clickhouse/deb"
+clickhouse_repo_url: "https://packages.clickhouse.com/deb"
+clickhouse_repo_key_url: "https://packages.clickhouse.com/rpm/lts/repodata/repomd.xml.key"
+# Пин на LTS-ветку 25.8; * покрывает patch-версию — не уедем на более новую ветку
+clickhouse_version: "25.8.*"
+
+# --- Сетевые порты ClickHouse Server ---
+clickhouse_tcp_port: 9000
+clickhouse_http_port: 8123
+clickhouse_interserver_port: 9009
+
+# --- Сетевые порты ClickHouse Keeper ---
+clickhouse_keeper_tcp_port: 9181
+clickhouse_keeper_raft_port: 9234
+
+# --- Сетевые настройки ---
+# По умолчанию слушаем на всех интерфейсах; можно ограничить до internal_ip
+clickhouse_listen_host: "0.0.0.0"
+
+# --- Параметры кластера ---
+clickhouse_cluster_name: "ch_cluster"
+clickhouse_cluster_shards: 1
+clickhouse_cluster_replicas: 3
+
+# --- Пути Keeper ---
+# Каталоги данных, логов и снимков; пакет clickhouse-server их не создаёт автоматически
+clickhouse_keeper_data_dir: "/var/lib/clickhouse-keeper"
+clickhouse_keeper_log_dir: "/var/lib/clickhouse-keeper/logs"
+clickhouse_keeper_snapshot_dir: "/var/lib/clickhouse-keeper/snapshots"
+clickhouse_keeper_config_path: "/etc/clickhouse-keeper/keeper_config.xml"
+
+# --- Пути Server ---
+# Директории для дополнительных конфигов; пакет создаёт их, но мы проверяем явно
+clickhouse_server_config_d: "/etc/clickhouse-server/config.d"
+clickhouse_server_users_d: "/etc/clickhouse-server/users.d"
+
+# --- Секреты (ОБЯЗАТЕЛЬНЫ, задаются извне через Vault) ---
+# clickhouse_secret: "{{ vault_clickhouse_secret }}"          # межсерверная аутентификация
+# clickhouse_default_password: "{{ vault_clickhouse_default_password }}"  # пароль юзера default

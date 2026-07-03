@@ -1,0 +1,29 @@
+---
+# Порядок деплоя ClickHouse-кластера.
+#
+# Keeper-плей идёт БЕЗ serial: 1. Свежий raft-ансамбль из 3 узлов нельзя
+# забутстрапить по одному: клиентский порт 9181 открывается только ПОСЛЕ
+# кворума (2 из 3), а одна нода кворум собрать не может — health-gate ruok
+# повиснет навсегда. Поэтому первичный подъём идёт на всех нодах сразу.
+#
+# Rolling-безопасность рестартов обеспечивает throttle: 1 в хендлере
+# "Restart clickhouse-keeper": при изменении конфига keeper перезапускается
+# по одной ноде, кворум при этом сохраняется. Это ключевой урок: serial: 1
+# нужен для ОБНОВЛЕНИЙ существующего кластера, а не для его бутстрапа.
+
+- name: "Плей 1: Keeper-ансамбль на всех нодах (бутстрап кворума)"
+  hosts: clickhouse
+  become: true
+  vars:
+    clickhouse_component: keeper
+  roles:
+    - role: clickhouse
+
+- name: "Плей 2: ClickHouse Server (rolling, serial 1)"
+  hosts: clickhouse
+  become: true
+  serial: 1
+  vars:
+    clickhouse_component: server
+  roles:
+    - role: clickhouse

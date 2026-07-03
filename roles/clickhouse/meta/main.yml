@@ -1,0 +1,20 @@
+---
+# Метаданные роли для Ansible Galaxy и документации.
+# min_ansible_version: 2.15 требует модуль deb822_repository (добавлен в 2.15).
+galaxy_info:
+  author: erlong
+  description: "Единая роль для установки ClickHouse Keeper и Server на Ubuntu"
+  license: MIT
+  min_ansible_version: "2.15"
+  platforms:
+    - name: Ubuntu
+      versions:
+        - jammy
+        - noble
+  galaxy_tags:
+    - clickhouse
+    - keeper
+    - database
+    - replication
+
+dependencies: []

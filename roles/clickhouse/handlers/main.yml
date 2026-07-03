@@ -1,0 +1,17 @@
+---
+# Хэндлеры перезапуска компонентов ClickHouse.
+# throttle: 1 для keeper — рестарт по одной ноде → кворум (2 из 3) сохраняется.
+# Для server используется serial: 1 в плее, throttle здесь не нужен.
+
+- name: "Restart clickhouse-keeper"
+  ansible.builtin.systemd:
+    name: clickhouse-keeper
+    state: restarted
+    daemon_reload: true
+  throttle: 1
+
+- name: "Restart clickhouse-server"
+  ansible.builtin.systemd:
+    name: clickhouse-server
+    state: restarted
+    daemon_reload: true

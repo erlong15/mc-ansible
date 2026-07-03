@@ -1,0 +1,5 @@
+# Пинируем пакеты ClickHouse на ветку {{ clickhouse_version }}
+# Pin-Priority: 1001 означает «устанавливать эту версию, даже если доступна более новая»
+Package: clickhouse-*
+Pin: version {{ clickhouse_version }}
+Pin-Priority: 1001

@@ -1,0 +1,30 @@
+# Скопируй в terraform.tfvars и заполни своими значениями:
+#   cp terraform.tfvars.example terraform.tfvars
+#
+# Токен НЕ указывается здесь — экспортируй перед apply:
+#   export YC_TOKEN=$(yc iam create-token)
+#
+# Как узнать cloud_id и folder_id:
+#   yc config get cloud-id
+#   yc config get folder-id
+
+yc_cloud_id  = "b1gxxxxxxxxxxxxxxxxx"   # замени на свой cloud_id
+yc_folder_id = "b1gxxxxxxxxxxxxxxxxx"   # замени на свой folder_id
+
+# Зона доступности (по умолчанию ru-central1-a)
+# yc_zone = "ru-central1-a"
+
+# Окружение — используется как префикс в именах ресурсов
+# env = "ch"
+
+# Путь к публичному SSH-ключу (по умолчанию ~/.ssh/id_rsa.pub)
+# ssh_public_key_path = "~/.ssh/id_rsa.pub"
+
+# CIDR для SSH-доступа — ограничь своим IP в реальном проекте
+# allowed_ssh_cidr = ["0.0.0.0/0"]
+
+# Параметры ВМ — дефолты подходят для стенда (2 vCPU / 4 ГБ / 20 ГБ диск)
+# cores         = 2
+# memory        = 4
+# core_fraction = 20
+# disk_size     = 20

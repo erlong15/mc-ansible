@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<!--
+  Конфигурация отдельного процесса ClickHouse Keeper.
+  Это НЕ embedded keeper_server внутри clickhouse-server — это самостоятельный демон.
+  Keeper реализует ZooKeeper-совместимый протокол для координации репликации ClickHouse.
+
+  ВАЖНО: корневой тег — <clickhouse>. Без него keeper падает с SIGSEGV ещё до
+  записи логов: парсер ожидает стандартный корень конфигурации ClickHouse.
+-->
+<clickhouse>
+    <!-- Логирование самого демона keeper (не путать с raft-логами) -->
+    <logger>
+        <level>information</level>
+        <log>/var/log/clickhouse-keeper/clickhouse-keeper.log</log>
+        <errorlog>/var/log/clickhouse-keeper/clickhouse-keeper.err.log</errorlog>
+        <size>100M</size>
+        <count>3</count>
+    </logger>
+
+    <!-- Слушать на всех интерфейсах: health-gate и сервер ходят на internal_ip -->
+    <listen_host>0.0.0.0</listen_host>
+
+    <keeper_server>
+        <!-- Уникальный ID этой ноды в Raft-кластере Keeper -->
+        <server_id>{{ keeper_id }}</server_id>
+
+        <!-- TCP-порт для ZooKeeper-совместимых клиентских подключений (clickhouse-server) -->
+        <tcp_port>{{ clickhouse_keeper_tcp_port }}</tcp_port>
+
+        <!-- Хранение логов Raft: журнал изменений состояния -->
+        <log_storage_path>{{ clickhouse_keeper_log_dir }}</log_storage_path>
+
+        <!-- Хранение снимков (snapshots): бинарные дампы состояния для быстрого восстановления -->
+        <snapshot_storage_path>{{ clickhouse_keeper_snapshot_dir }}</snapshot_storage_path>
+
+        <coordination_settings>
+            <!-- Таймаут операции записи в Raft (мс) -->
+            <operation_timeout_ms>10000</operation_timeout_ms>
+            <!-- Таймаут сессии клиента (мс); при истечении сессия считается утраченной -->
+            <session_timeout_ms>30000</session_timeout_ms>
+            <!-- Уровень логирования Raft-движка; information = умеренный вывод -->
+            <raft_logs_level>information</raft_logs_level>
+        </coordination_settings>
+
+        <!--
+          Конфигурация Raft-кластера: все три ноды участвуют в выборах лидера.
+          Кворум = 2 из 3 → потеря одной ноды не прерывает работу.
+        -->
+        <raft_configuration>
+{% for h in groups[clickhouse_cluster_group] %}
+            <server>
+                <id>{{ hostvars[h].keeper_id }}</id>
+                <hostname>{{ hostvars[h].internal_ip }}</hostname>
+                <port>{{ clickhouse_keeper_raft_port }}</port>
+            </server>
+{% endfor %}
+        </raft_configuration>
+    </keeper_server>
+</clickhouse>

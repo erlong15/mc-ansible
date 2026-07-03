@@ -1,0 +1,37 @@
+---
+# Валидация входных параметров роли — выполняется до запуска задач.
+# ansible-lint и Ansible ≥2.11 проверяют соответствие vars объявленным specs.
+argument_specs:
+  main:
+    short_description: "Роль для установки и настройки ClickHouse (Keeper или Server)"
+    description:
+      - "Объединяет установку пакетов, конфигурацию и health-gate для двух компонентов."
+      - "Компонент задаётся переменной clickhouse_component в плее."
+    options:
+      clickhouse_component:
+        type: "str"
+        required: true
+        choices:
+          - "keeper"
+          - "server"
+        description: "Компонент для настройки: keeper — ZooKeeper-совместимый координатор, server — OLAP-движок."
+      clickhouse_secret:
+        type: "str"
+        required: true
+        description: "Секрет для межсерверной аутентификации (remote_servers). Берётся из Vault."
+      clickhouse_default_password:
+        type: "str"
+        required: true
+        description: "Пароль пользователя default. SHA-256 хэш записывается в users.d. Берётся из Vault."
+      clickhouse_cluster_name:
+        type: "str"
+        required: false
+        description: "Имя кластера ClickHouse в remote_servers.xml. По умолчанию: ch_cluster."
+      clickhouse_version:
+        type: "str"
+        required: false
+        description: "Маска версии пакета для apt-preferences (например: 25.8.*). По умолчанию: 25.8.*."
+      clickhouse_cluster_group:
+        type: "str"
+        required: false
+        description: "Имя группы инвентори с нодами кластера. Используется в шаблонах Jinja2. По умолчанию: clickhouse."

@@ -1,0 +1,58 @@
+---
+# Общая установка ClickHouse: репозиторий, GPG-ключ, пин версии, пакет.
+# Выполняется для обоих компонентов (keeper и server используют один бинарь).
+# Пакет clickhouse-server даёт бинарь /usr/bin/clickhouse и симлинк /usr/bin/clickhouse-keeper.
+
+- name: "Установить пакеты-пререквизиты apt"
+  ansible.builtin.apt:
+    name:
+      - ca-certificates
+      - apt-transport-https
+      - gnupg
+      - netcat-openbsd
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: "Скачать GPG-ключ репозитория ClickHouse (.asc = armored, иначе apt: NO_PUBKEY)"
+  ansible.builtin.get_url:
+    url: "{{ clickhouse_repo_key_url }}"
+    dest: "/usr/share/keyrings/clickhouse-keyring.asc"
+    mode: "0644"
+
+- name: "Добавить deb822-репозиторий ClickHouse"
+  ansible.builtin.deb822_repository:
+    name: clickhouse
+    types: deb
+    uris: "{{ clickhouse_repo_url }}"
+    suites: stable
+    components: main
+    signed_by: /usr/share/keyrings/clickhouse-keyring.asc
+    state: present
+    enabled: true
+
+- name: "Шаблон apt-preferences: пин версии {{ clickhouse_version }}"
+  ansible.builtin.template:
+    src: clickhouse.pref.j2
+    dest: /etc/apt/preferences.d/clickhouse.pref
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: "Обновить кэш apt после добавления репозитория"
+  ansible.builtin.apt:
+    update_cache: true
+  changed_when: false
+
+- name: "Убедиться, что конфликтный пакет clickhouse-keeper отсутствует"
+  ansible.builtin.apt:
+    name: clickhouse-keeper
+    state: absent
+    purge: false
+
+- name: "Установить clickhouse-server и clickhouse-client (версия пинирована через preferences)"
+  ansible.builtin.apt:
+    name:
+      - clickhouse-server
+      - clickhouse-client
+    state: present

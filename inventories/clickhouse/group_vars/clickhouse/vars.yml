@@ -1,0 +1,16 @@
+---
+# Переменные группы clickhouse, специфичные для этого окружения.
+# Операционные дефолты (порты, версия, пути) живут в defaults/main.yml роли.
+# Переопределяй здесь только то, что отличается от дефолтов роли.
+
+# --- Зеркало репозитория (раскомментируй при работе из РФ) ---
+# clickhouse_repo_url: "https://mirror.yandex.ru/mirrors/clickhouse/deb"
+
+# --- Параметры кластера ---
+# Имя кластера в remote_servers.xml и макросах реплик
+clickhouse_cluster_name: "ch_cluster"
+
+# --- Секреты (значения живут в vault.yml, здесь только маппинг) ---
+# vault_clickhouse_secret и vault_clickhouse_default_password хранятся зашифрованными.
+clickhouse_secret: "{{ vault_clickhouse_secret }}"
+clickhouse_default_password: "{{ vault_clickhouse_default_password }}"

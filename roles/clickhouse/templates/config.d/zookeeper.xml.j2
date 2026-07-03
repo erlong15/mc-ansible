@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<!--
+  Подключение ClickHouse Server к ансамблю ClickHouse Keeper.
+  Тег <zookeeper> исторический: ClickHouse Keeper реализует ZooKeeper-совместимый протокол,
+  поэтому сервер не знает разницы между настоящим ZooKeeper и нашим Keeper.
+  Все три ноды перечислены для отказоустойчивости — клиент попробует следующую при сбое.
+-->
+<clickhouse>
+    <zookeeper>
+{% for h in groups[clickhouse_cluster_group] %}
+        <node>
+            <host>{{ hostvars[h].internal_ip }}</host>
+            <port>{{ clickhouse_keeper_tcp_port }}</port>
+        </node>
+{% endfor %}
+    </zookeeper>
+</clickhouse>

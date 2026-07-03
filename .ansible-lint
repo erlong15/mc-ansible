@@ -1,0 +1,4 @@
+---
+# Конфигурация ansible-lint: исключаем зашифрованный vault из проверки.
+exclude_paths:
+  - inventories/clickhouse/group_vars/clickhouse/vault.yml

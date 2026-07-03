@@ -1,0 +1,85 @@
+---
+# Капстоун-валидация: требует живого кластера ClickHouse.
+# Запуск: ansible-playbook playbooks/clickhouse/validate.yml --ask-vault-pass
+#
+# Плей 1 (ch-01): создаёт БД и таблицу ON CLUSTER — распределённый DDL
+#   проходит через Keeper и материализует локальную реплику на КАЖДОЙ ноде.
+#   Без ON CLUSTER таблица появилась бы только на ch-01, и читать было бы нечего.
+#   Затем вставляет строку локально на ch-01.
+# Плей 2 (ch-02/ch-03): читает строку — доказательство, что данные приехали
+#   на реплики через Keeper (с ретраями против гонки репликации).
+
+- name: "Инициализация тестовых данных (DDL через Keeper, ON CLUSTER)"
+  hosts: ch-01
+  become: true
+  gather_facts: false
+
+  tasks:
+    - name: "Создать базу данных capstone_db на всём кластере"
+      ansible.builtin.command:
+        cmd: >-
+          clickhouse-client
+          --host 127.0.0.1
+          --password "{{ clickhouse_default_password }}"
+          --query "CREATE DATABASE IF NOT EXISTS capstone_db
+            ON CLUSTER '{{ clickhouse_cluster_name }}'"
+      changed_when: false
+      no_log: true
+
+    - name: "Создать таблицу ReplicatedMergeTree на всём кластере"
+      ansible.builtin.command:
+        cmd: >-
+          clickhouse-client
+          --host 127.0.0.1
+          --password "{{ clickhouse_default_password }}"
+          --query "CREATE TABLE IF NOT EXISTS capstone_db.events
+            ON CLUSTER '{{ clickhouse_cluster_name }}'
+            (id UInt64, message String, ts DateTime DEFAULT now())
+            ENGINE = ReplicatedMergeTree(
+              '/clickhouse/tables/{shard}/capstone_db/events',
+              '{replica}'
+            )
+            ORDER BY id"
+      changed_when: false
+      no_log: true
+
+    - name: "Вставить тестовую строку на ch-01"
+      ansible.builtin.command:
+        cmd: >-
+          clickhouse-client
+          --host 127.0.0.1
+          --password "{{ clickhouse_default_password }}"
+          --query "INSERT INTO capstone_db.events (id, message)
+            VALUES (1, 'replication-check')"
+      changed_when: true
+      no_log: true
+
+- name: "Проверка репликации на репликах кластера"
+  hosts: clickhouse
+  become: true
+  gather_facts: false
+
+  tasks:
+    - name: "Прочитать строку (с ретраями): {{ inventory_hostname }}"
+      ansible.builtin.command:
+        cmd: >-
+          clickhouse-client
+          --host 127.0.0.1
+          --password "{{ clickhouse_default_password }}"
+          --query "SELECT count() FROM capstone_db.events WHERE id = 1"
+      register: replica_count
+      changed_when: false
+      retries: 10
+      delay: 2
+      # >= 1: доказываем сам факт прихода строки на реплику через Keeper.
+      # Точное число не проверяем — повторные прогоны капстоуна добавляют строки
+      # (INSERT с ts DEFAULT now() даёт новый блок, дедупликация не срабатывает).
+      until: replica_count.stdout | trim | int >= 1
+      failed_when: replica_count.stdout | trim | int < 1
+      no_log: true
+      when: inventory_hostname != "ch-01"
+
+    - name: "Подтвердить репликацию на {{ inventory_hostname }}"
+      ansible.builtin.debug:
+        msg: "Репликация ОК на {{ inventory_hostname }}: count()={{ replica_count.stdout | trim }}"
+      when: inventory_hostname != "ch-01"

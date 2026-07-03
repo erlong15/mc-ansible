@@ -1,0 +1,16 @@
+---
+# Сгенерировано из outputs OpenTofu (terraform/inventory.tftpl). Не редактировать вручную.
+#   tofu output -raw inventory > inventories/clickhouse/hosts.yaml
+clickhouse:
+  hosts:
+    ch-01:
+      ansible_host: 89.169.128.160
+      internal_ip: 10.10.0.21
+    ch-02:
+      ansible_host: 158.160.58.116
+      internal_ip: 10.10.0.26
+    ch-03:
+      ansible_host: 158.160.44.235
+      internal_ip: 10.10.0.18
+  vars:
+    ansible_user: ubuntu

@@ -1,0 +1,15 @@
+---
+# Диспетчер задач роли clickhouse.
+# Установка пакетов общая для обоих компонентов.
+# Затем запускается конфигурация нужного компонента по значению clickhouse_component.
+
+- name: "Установить ClickHouse (репозиторий и пакет)"
+  ansible.builtin.include_tasks: install.yml
+
+- name: "Настроить компонент keeper"
+  ansible.builtin.include_tasks: keeper.yml
+  when: clickhouse_component == 'keeper'
+
+- name: "Настроить компонент server"
+  ansible.builtin.include_tasks: server.yml
+  when: clickhouse_component == 'server'

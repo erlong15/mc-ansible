@@ -1,0 +1,13 @@
+---
+# Конфигурация yamllint для мастеркласса по Ansible.
+# line-length: warning (не error) — позволяет длинные строки в XML-шаблонах.
+extends: default
+rules:
+  line-length:
+    max: 160
+    level: warning
+  comments:
+    min-spaces-from-content: 1
+  comments-indentation: false
+ignore: |
+  inventories/clickhouse/group_vars/clickhouse/vault.yml
