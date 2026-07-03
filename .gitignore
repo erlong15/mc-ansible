@@ -53,3 +53,6 @@ kubeconfig
 # Ansible
 *.retry
 .vault_pass
+
+.claude/
+CLAUDE.md

@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "ansible": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@ansible/ansible-mcp-server",
+        "--stdio"
+      ],
+      "env": {}
+    }
+  }
+}
