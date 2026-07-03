@@ -997,7 +997,7 @@ serial: 1 (НЕПРАВИЛЬНО для bootstrap):
 - Документация Ansible: https://docs.ansible.com/ansible/latest/
 - Встроенные модули (FQCN): https://docs.ansible.com/ansible/latest/collections/ansible/builtin/
 - ClickHouse Keeper: https://clickhouse.com/docs/en/guides/sre/keeper/clickhouse-keeper
-- Репозиторий мастеркласса: https://github.com/your-org/mc-ansible
+- Репозиторий мастеркласса: https://github.com/erlong15/mc-ansible
 
 **Вопросы?**
 
