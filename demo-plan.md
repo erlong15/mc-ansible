@@ -287,8 +287,10 @@ git clone https://github.com/erlong15/ansible /tmp/express-audit
 
 # Запускаем аудит против наших нод — переиспользуем наш dynamic inventory.
 # Ноды доступны под ubuntu с NOPASSWD-sudo, отдельный audit-юзер не нужен.
+export INVPATH=$PWD
+cd  /tmp/express-audit
 ansible-playbook \
-  -i "$PWD/inventories/clickhouse/yc.py" \
+  -i "$INVPATH/inventories/clickhouse/yc.py" \
   /tmp/express-audit/playbooks/express-audit/run.yml
 
 # Параллельно — паттерн задач аудита
